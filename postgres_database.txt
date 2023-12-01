@@ -1,0 +1,250 @@
+Creating an api service:
+const express=require("express");
+const d = require("./postgres/database4.js");
+
+var app = express();
+console.log('1');
+app.use(express.json());
+console.log('2');
+app.use(express.urlencoded({extended:false}));
+console.log('3');
+app.use('/database4',d.database4);
+console.log('4');
+
+const start = (port) => {
+    try {
+        app.listen(port,() => {
+          console.log('api running at http://localhost:${port}');
+        });
+      } catch(err) {
+        console.error(err);
+        process.exit();
+      }
+    };
+    
+   start(3002)
+sending a request to client and returning the chassis_id:
+const express = require("express");
+var app = express();
+
+const { Client } = require('pg');
+const client = new Client({
+    host: 'localhost',
+    user: 'postgres',
+    password: 'vyshu',
+    database: 'postgres',
+    port:5432,
+  });
+  
+
+
+client.connect(function(err) {
+  if (err) {
+    console.error('Error connecting to MySQL: ' + err.stack);
+    return;
+  }
+  console.log('Connected!');
+});
+module.exports = {
+    database2 : function(req, res)  {
+        const equipment_id = req.body.equipment_id; 
+        console.log('vyshu');
+        const customer_id =req.body.customer_id;
+        console.log(req.body);
+      
+        if (!equipment_id) {
+          return res.status(400).json({ error: 'equimentid ID is required' });
+        }
+      
+        const query = 'SELECT * FROM equipment_uses_new where equipment_id = $1';
+      
+        client.query(query,[equipment_id],(err, result) => {
+          if (err) {
+            console.error('Error executing MySQL query: ' + err.stack);
+            return res.status(500).json({ error: 'equip id not found'});
+          }
+          res.json(result.rows);
+      });
+          
+         
+  }}
+Creating an API end point.
+And then created a function.And i called a street_turn_condition which is wrote in postgres equipment_uses table:
+
+const express = require("express");
+var app = express();
+
+const { Client } = require('pg');
+const client = new Client({
+    host: 'localhost',
+    user: 'postgres',
+    password: 'vyshu',
+    database: 'postgres',
+    port:5432,
+  });
+  
+
+
+client.connect(function(err) {
+  if (err) {
+    console.error('Error connecting to MySQL: ' + err.stack);
+    return;
+  }
+  console.log('Connected!');
+});
+module.exports = {
+    database3 : function(req, res)  {
+        const {out_dt,in_dt}= req.body; 
+        console.log('vyshu');
+      
+        const query = 'SELECT public.chassislist122($1,$2)';
+
+        client.query(query,[out_dt,in_dt],(err, result)=>{
+            if (err) {
+                console.error('Error executing MySQL query: ' + err.stack);
+                return res.status(500).json({ error: 'equip id not found'});
+              }
+              res.json(result.rows);
+
+        })
+
+        
+      
+        
+          
+      },
+          
+         
+    }
+inserting a data in postgres equipment_uses table:
+
+const express = require("express");
+var app = express();
+
+const { Client } = require('pg');
+const client = new Client({
+    host: 'localhost',
+    user: 'postgres',
+    password: 'vyshu',
+    database: 'postgres',
+    port:5432,
+  });
+  
+
+
+client.connect(function(err) {
+  if (err) {
+    console.error('Error connecting to MySQL: ' + err.stack);
+    return;
+  }
+  console.log('Connected!');
+});
+module.exports = {
+    database4 : function(req, res)  {
+        const columns = Object.keys(req.body).join(',');
+        console.log(columns);
+    const values = Object.values(req.body);
+    console.log(values)
+      
+    const placeholders = values.map((_, index) => `$${index + 1}`).join(', ');
+
+    const query = `INSERT INTO equipment_uses_new (${columns}) VALUES (${placeholders})`;
+
+
+        client.query(query,values,(err, result)=>{
+            if (err) {
+                console.error('Error executing MySQL query: ' + err.stack);
+                return res.status(500).json({ error: 'data not inserted'});
+              }
+              res.json(result.rows);
+
+        })
+
+        
+      
+        
+          
+      },
+          
+         
+        
+      
+      
+      
+      
+      
+    }
+inserting a multiple rows of data in postgres equipment_uses table:
+const express = require("express");
+var app = express();
+
+const { Client } = require('pg');
+const client = new Client({
+    host: 'localhost',
+    user: 'postgres',
+    password: 'vyshu',
+    database: 'postgres',
+    port:5432,
+  });
+  
+
+
+client.connect(function(err) {
+  if (err) {
+    console.error('Error connecting to MySQL: ' + err.stack);
+    return;
+  }
+  console.log('Connected!');
+});
+module.exports = {
+    database5 : function(req, res)  {
+        const columns = Object.keys(req.body[0]).join(',');
+        console.log(columns);
+    const multiplerows = req.body;
+    //console.log(values)
+    let i=0;
+    while(i<multiplerows.length){
+        const values = Object.values(multiplerows[i]);
+      
+    const placeholders = values.map((_, index) => `$${index + 1}`).join(', ');
+
+    const query = `INSERT INTO equipment_uses_new (${columns}) VALUES (${placeholders})`;
+
+
+        client.query(query,values,(err, result)=>{
+            if (err) {
+                console.error('Error executing MySQL query: ' + err.stack);
+                return res.status(500).json({ error: 'data not inserted'});
+              }
+              
+
+        })
+
+        
+     i+=1; 
+        
+    }
+res.json("success")
+},
+          
+         
+        
+      
+      
+      
+      
+      
+    }
+
+
+     
+
+
+     
+
+
+     
+
+
+     
+   
